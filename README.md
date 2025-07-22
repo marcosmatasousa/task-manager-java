@@ -40,11 +40,18 @@ Authentication and user management are also supported. This project was made jus
     ```bash
    mvn spring-boot:run
    
-3. Access the API at
+3. Setup your database:
+   ```bash 
+      cd src/main/resources
+   ```
+   And replace `your_db_url_here`, `your_username_here`, and `your_password_here` at the `application.properties` file. 
+
+
+4. Access the API at
     ```bash
     http://localhost:8080
 
-4. For documentation and testing access: 
+5. For documentation and testing access: 
    ```bash
    http://localhost:8080/swagger-ui/index.html/
 
