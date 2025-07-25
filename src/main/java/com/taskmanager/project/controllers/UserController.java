@@ -3,7 +3,7 @@ package com.taskmanager.project.controllers;
 import com.taskmanager.project.models.User;
 import com.taskmanager.project.models.UserDTO;
 import com.taskmanager.project.models.SignUpDTO;
-import com.taskmanager.project.repository.UserRepository;
+import com.taskmanager.project.services.UserService;
 import com.taskmanager.project.utils.PasswordUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -22,10 +22,10 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserRepository repo;
+    private final UserService userService;
 
-    public UserController(UserRepository repo) {
-        this.repo = repo;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @Operation(description = "Create new user")
@@ -43,7 +43,7 @@ public class UserController {
     })
     @PostMapping
     public ResponseEntity<?> create(@RequestBody @Valid SignUpDTO userSignUp) {
-        if (repo.existsByEmail(userSignUp.getEmail())) {;
+        if (userService.existsByEmail(userSignUp.getEmail())) {;
             return ResponseEntity.badRequest().body("E-mail already in use");
         }
 
@@ -55,7 +55,7 @@ public class UserController {
                 encryptedPassword
         );
 
-        User saved = repo.save(newUser);
+        User saved = userService.createNewUser(newUser);
         UserDTO userDTO = new UserDTO(saved);
         return ResponseEntity.status(201).body(userDTO);
     }
@@ -72,7 +72,7 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping
     public List<UserDTO> getAll() {
-        List<User> users = repo.findAll();
+        List<User> users = userService.getAllUsers();
         return users.stream().map(UserDTO::new).toList();
     }
 }

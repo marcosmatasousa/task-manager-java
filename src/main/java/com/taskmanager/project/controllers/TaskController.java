@@ -1,8 +1,8 @@
 package com.taskmanager.project.controllers;
 
 import com.taskmanager.project.models.*;
-import com.taskmanager.project.repository.TaskRepository;
-import com.taskmanager.project.repository.UserRepository;
+import com.taskmanager.project.services.TaskService;
+import com.taskmanager.project.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -23,12 +23,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/todos")
 public class TaskController {
-    private final TaskRepository taskRepo;
-    private final UserRepository userRepo;
+    private final TaskService taskService;
+    private final UserService userService;
 
-    public TaskController(TaskRepository taskRepo, UserRepository userRepository) {
-        this.taskRepo = taskRepo;
-        this.userRepo = userRepository;
+    public TaskController(TaskService taskService, UserService userService) {
+        this.taskService = taskService;
+        this.userService = userService;
     }
 
     @Operation(description = "Create new Task")
@@ -54,9 +54,9 @@ public class TaskController {
         Status status = newTaskRequest.getStatus();
         String description = newTaskRequest.getDescription();
 
-        User user = userRepo.getById(userId);
-        Task newTask = new Task(user, description, status);
-        taskRepo.save(newTask);
+        Optional<User> user = userService.getById(userId);
+        Task newTask = new Task(user.get(), description, status);
+        taskService.createNewTask(newTask);
         return ResponseEntity.status(201).body(newTask);
     }
 
@@ -85,12 +85,12 @@ public class TaskController {
         Long userId = Long.parseLong(stringId);
 
         if (status == null || status.isBlank()) {
-            return ResponseEntity.ok(taskRepo.findByUserId(userId));
+            return ResponseEntity.ok(taskService.getTasksByUserId(userId));
         }
 
         try {
             Status statusEnum = Status.valueOf(status.toUpperCase());
-            List<Task> tasks = taskRepo.findByUserIdAndStatus(userId, statusEnum);
+            List<Task> tasks = taskService.getTasksByUserIdAndStatus(userId, statusEnum);
             return ResponseEntity.ok(tasks);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid status " + status);
@@ -117,7 +117,7 @@ public class TaskController {
     public ResponseEntity<?> updateStatus(@RequestBody TaskStatusUpdateDTO dto) {
         try {
             Status newStatus = Status.valueOf(dto.getStatus().toUpperCase());
-            Optional<Task> optionalTask = taskRepo.findById(dto.getId());
+            Optional<Task> optionalTask = taskService.getTaskById(dto.getId());
 
             if (optionalTask.isEmpty()) {
                 return ResponseEntity.status(404).body("To do not found");
@@ -125,7 +125,7 @@ public class TaskController {
 
             Task todo = optionalTask.get();
             todo.setStatus(newStatus);
-            taskRepo.save(todo);
+            taskService.updateStatus(todo);
 
             return ResponseEntity.ok().body(todo);
         } catch(IllegalArgumentException e) {

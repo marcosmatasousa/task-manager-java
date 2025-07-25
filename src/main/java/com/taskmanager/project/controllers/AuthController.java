@@ -1,7 +1,7 @@
 package com.taskmanager.project.controllers;
 import com.taskmanager.project.models.LoginDTO;
 import com.taskmanager.project.models.User;
-import com.taskmanager.project.repository.UserRepository;
+import com.taskmanager.project.services.AuthService;
 import com.taskmanager.project.utils.JwtUtil;
 import com.taskmanager.project.utils.PasswordUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,12 +16,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
-    private UserRepository userRepo;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
     private JwtUtil jwt;
 
     @Operation(description = "Authorize user")
@@ -38,13 +42,13 @@ public class AuthController {
         String email = data.getEmail();
         String password = data.getPassword();
 
-        User user = userRepo.findByEmail(email);
+        Optional<User> user = authService.findByEmail(email);
 
-        if (user == null || !PasswordUtil.verify(password, user.getPassword())) {
+        if (user.isEmpty() || !PasswordUtil.verify(password, user.get().getPassword())) {
             return ResponseEntity.status(401).body("Bad credentials");
         }
 
-        String token = JwtUtil.generateToken(user.getId().toString());
+        String token = JwtUtil.generateToken(user.get().getId().toString());
         return ResponseEntity.ok(Map.of("token", token));
     }
 }
