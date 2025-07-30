@@ -23,11 +23,6 @@ public class User {
     private String password;
 
     public User() {}
-    public User(Long id, String email, String username, String password) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-    }
 
     public User(String email, String username, String password) {
         this.username = username;

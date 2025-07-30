@@ -1,5 +1,7 @@
 package com.taskmanager.project.services;
 
+import com.taskmanager.project.exceptions.EmailAlreadyInUseException;
+import com.taskmanager.project.exceptions.NotFoundException;
 import com.taskmanager.project.models.User;
 import com.taskmanager.project.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class UserService {
     }
 
     public User createNewUser(User user) {
+        if (existsByEmail(user.getEmail())) {
+            throw new EmailAlreadyInUseException("E-mail already in use");
+        }
         return userRepository.save(user);
     }
 
@@ -27,7 +32,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getById(Long id) {
-        return userRepository.findById(id);
+    public User getById(Long id) {
+        return userRepository.findById(id).
+                orElseThrow(() -> new NotFoundException("User not found"));
     }
 }
