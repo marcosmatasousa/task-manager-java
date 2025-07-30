@@ -30,6 +30,12 @@ public class User {
         this.password = password;
     }
 
+    public User(SignUpDTO dto) {
+        this.username = dto.getUsername();
+        this.email = dto.getEmail();
+        this.password = dto.getPassword();
+    }
+
     public Long getId() {
         return id;
     }

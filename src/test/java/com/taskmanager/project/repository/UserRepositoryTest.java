@@ -2,7 +2,6 @@ package com.taskmanager.project.repository;
 
 import com.taskmanager.project.models.SignUpDTO;
 import com.taskmanager.project.models.User;
-import com.taskmanager.project.models.UserDTO;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
