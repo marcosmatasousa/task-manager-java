@@ -1,5 +1,6 @@
 package com.taskmanager.project.services;
 
+import com.taskmanager.project.exceptions.NotFoundException;
 import com.taskmanager.project.models.User;
 import com.taskmanager.project.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,8 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User getByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Bad credentials"));
     }
 }

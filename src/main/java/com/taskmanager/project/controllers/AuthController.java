@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -42,13 +41,13 @@ public class AuthController {
         String email = data.getEmail();
         String password = data.getPassword();
 
-        Optional<User> user = authService.findByEmail(email);
+        User user = authService.getByEmail(email);
 
-        if (user.isEmpty() || !PasswordUtil.verify(password, user.get().getPassword())) {
+        if (!PasswordUtil.verify(password, user.getPassword())) {
             return ResponseEntity.status(401).body("Bad credentials");
         }
 
-        String token = JwtUtil.generateToken(user.get().getId().toString());
+        String token = JwtUtil.generateToken(user.getId().toString());
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

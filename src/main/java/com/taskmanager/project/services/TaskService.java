@@ -1,5 +1,6 @@
 package com.taskmanager.project.services;
 
+import com.taskmanager.project.exceptions.NotFoundException;
 import com.taskmanager.project.models.Status;
 import com.taskmanager.project.models.Task;
 import com.taskmanager.project.repository.TaskRepository;
@@ -28,8 +29,9 @@ public class TaskService {
         return taskRepository.findByUserIdAndStatus(userId, status);
     }
 
-    public Optional<Task> getTaskById(Long id) {
-        return taskRepository.findById(id);
+    public Task getTaskById(Long id) {
+        return taskRepository.findById(id).
+                orElseThrow(() -> new NotFoundException("Task " + id + " not found"));
     }
 
     public Task updateStatus(Task task) {

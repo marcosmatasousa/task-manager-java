@@ -54,8 +54,9 @@ public class TaskController {
         Status status = newTaskRequest.getStatus();
         String description = newTaskRequest.getDescription();
 
-        Optional<User> user = userService.getById(userId);
-        Task newTask = new Task(user.get(), description, status);
+        User user = userService.getById(userId);
+
+        Task newTask = new Task(user, description, status);
         taskService.createNewTask(newTask);
         return ResponseEntity.status(201).body(newTask);
     }
@@ -117,17 +118,12 @@ public class TaskController {
     public ResponseEntity<?> updateStatus(@RequestBody TaskStatusUpdateDTO dto) {
         try {
             Status newStatus = Status.valueOf(dto.getStatus().toUpperCase());
-            Optional<Task> optionalTask = taskService.getTaskById(dto.getId());
+            Task task = taskService.getTaskById(dto.getId());
 
-            if (optionalTask.isEmpty()) {
-                return ResponseEntity.status(404).body("To do not found");
-            }
+            task.setStatus(newStatus);
+            taskService.updateStatus(task);
 
-            Task todo = optionalTask.get();
-            todo.setStatus(newStatus);
-            taskService.updateStatus(todo);
-
-            return ResponseEntity.ok().body(todo);
+            return ResponseEntity.ok().body(task);
         } catch(IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid status: " + dto.getStatus());
         }

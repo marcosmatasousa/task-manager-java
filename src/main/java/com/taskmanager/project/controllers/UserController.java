@@ -42,11 +42,7 @@ public class UserController {
             )
     })
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody @Valid SignUpDTO userSignUp) {
-        if (userService.existsByEmail(userSignUp.getEmail())) {;
-            return ResponseEntity.badRequest().body("E-mail already in use");
-        }
-
+    public ResponseEntity<UserDTO> create(@RequestBody @Valid SignUpDTO userSignUp) {
         String encryptedPassword = PasswordUtil.encrypt(userSignUp.getPassword());
 
         User newUser = new User(
